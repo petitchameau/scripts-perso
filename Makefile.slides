@@ -1,0 +1,26 @@
+SOURCES = $(wildcard slides/*.md)
+TIKZ = $(wildcard tikz/*.tex)
+PANDOC = pandoc $< -s --highlight-style kate --filter ~/scripts/pandoc-videos.py -o $@
+TEX_OPTS = -t beamer+smart --pdf-engine lualatex
+WEB_OPTS = -t revealjs --mathjax
+
+all: web pdf
+tex: $(SOURCES:slides/%.md=documents/%.tex)
+pdf: $(SOURCES:slides/%.md=documents/%.pdf)
+web: $(SOURCES:slides/%.md=documents/%.html)
+tikz: $(TIKZ:tikz/%_t.tex=tikz/%_t.pdf)
+
+documents/%.tex: slides/%.md
+	$(PANDOC) $(TEX_OPTS)
+
+tikz/%.pdf: tikz/%.tex
+	pdflatex -shell-escape -output-directory=tikz $< && pdfcrop $@ crop.pdf && mv crop.pdf $@
+
+documents/%.pdf: slides/%.md
+	$(PANDOC) $(TEX_OPTS)
+
+documents/%.html: slides/%.md
+	$(PANDOC) $(WEB_OPTS)
+
+clean:
+	-rm -vf *.aux *.log *.nav *.media *.snm *.toc *.tmp *.tns *.pyg *.vrb *~ *.orig *.gnuplot *.table *.fls *.fdb_latexmk *.blg *.bbl 2> /dev/null
