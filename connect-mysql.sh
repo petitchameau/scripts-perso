@@ -1,3 +1,3 @@
 #!/bin/bash
 
-mysql -u root --password SuperPassword123!
+mysql -u root -p
